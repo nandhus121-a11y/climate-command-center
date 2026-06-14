@@ -1,4 +1,4 @@
-const CACHE_NAME = "climate-command-center-v2";
+const CACHE_NAME = "climate-command-center-v3";
 const APP_ASSETS = [
   "./",
   "./index.html",

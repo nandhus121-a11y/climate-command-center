@@ -481,7 +481,8 @@
             <table>
               <thead><tr><th>Level</th><th>Daily rain</th><th>Meal-window rain</th><th>App action</th></tr></thead>
               <tbody>
-                <tr><td><span class="risk-pill" data-risk="Medium">Medium</span></td><td>15 mm+</td><td>3 mm+</td><td>Watch</td></tr>
+                <tr><td><span class="risk-pill" data-risk="Watch">Watch</span></td><td>Chance signal</td><td>1-2.9 mm or 55%+ probability</td><td>Monitor</td></tr>
+                <tr><td><span class="risk-pill" data-risk="Medium">Medium</span></td><td>15 mm+</td><td>3 mm+</td><td>Team watch</td></tr>
                 <tr><td><span class="risk-pill" data-risk="Heavy">Heavy</span></td><td>65 mm+</td><td>10 mm+</td><td>Priority alert</td></tr>
                 <tr><td><span class="risk-pill" data-risk="Very Heavy">Very Heavy</span></td><td>115 mm+</td><td>20 mm+</td><td>Core team alert</td></tr>
                 <tr><td><span class="risk-pill" data-risk="Extreme">Extreme</span></td><td>200 mm+</td><td>35 mm+</td><td>Escalation</td></tr>
@@ -770,6 +771,8 @@
   function normalizeForecastRow(row) {
     const city = cityById(row.cityId) || CITY_DATA.find((item) => item.name === row.city) || CITY_DATA[0];
     const sources = typeof row.sources === "string" ? safeJson(row.sources, []) : row.sources || [];
+    const rainMm = Number(row.rainMm || row.consensusRainMm || 0);
+    const probability = Number(row.probability || row.popPct || 0);
     return {
       cityId: city.id,
       city: city.name,
@@ -777,9 +780,9 @@
       kam: city.kam,
       date: normalizeDateKey(row.date),
       meal: row.meal,
-      rainMm: Number(row.rainMm || row.consensusRainMm || 0),
-      probability: Number(row.probability || row.popPct || 0),
-      risk: row.risk || riskFromRain(Number(row.rainMm || 0), Number(row.probability || 0)),
+      rainMm,
+      probability,
+      risk: riskFromRain(rainMm, probability),
       confidence: Number(row.confidence || 0),
       changedMm: Number(row.changedMm || 0),
       sourceCount: Number(row.sourceCount || sources.length || 1),
@@ -1036,9 +1039,10 @@
     if (mm >= 35 || (mm >= 28 && probability >= 80)) return "Extreme";
     if (mm >= 20 || (mm >= 16 && probability >= 78)) return "Very Heavy";
     if (mm >= 10 || (mm >= 8 && probability >= 68)) return "Heavy";
-    if (mm >= 3 || probability >= 55) return "Medium";
-    if (mm >= 1 || probability >= 35) return "Watch";
-    return "Low";
+    if (mm >= 3) return "Medium";
+    if (mm >= 1 || probability >= 55) return "Watch";
+    if (mm > 0 || probability >= 25) return "Low";
+    return "Clear";
   }
 
   function resultFromPrediction(predicted, actual) {
