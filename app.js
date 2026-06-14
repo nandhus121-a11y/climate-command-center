@@ -775,7 +775,7 @@
       city: city.name,
       region: city.region,
       kam: city.kam,
-      date: row.date,
+      date: normalizeDateKey(row.date),
       meal: row.meal,
       rainMm: Number(row.rainMm || row.consensusRainMm || 0),
       probability: Number(row.probability || row.popPct || 0),
@@ -791,7 +791,7 @@
   function normalizeHistoryRow(row) {
     const city = cityById(row.cityId) || CITY_DATA.find((item) => item.name === row.city) || CITY_DATA[0];
     return {
-      date: row.date,
+      date: normalizeDateKey(row.date),
       cityId: city.id,
       city: city.name,
       region: city.region,
@@ -808,10 +808,10 @@
   function normalizeAlertRow(row) {
     const city = cityById(row.cityId) || CITY_DATA.find((item) => item.name === row.city) || CITY_DATA[0];
     return {
-      id: row.id || `${city.id}-${row.date}-${row.meal}-${row.type || "alert"}`,
+      id: row.id || `${city.id}-${normalizeDateKey(row.date)}-${row.meal}-${row.type || "alert"}`,
       cityId: city.id,
       city: city.name,
-      date: row.date,
+      date: normalizeDateKey(row.date),
       meal: row.meal,
       risk: row.risk || "Watch",
       changeMm: Number(row.changeMm || row.changedMm || 0),
@@ -1117,13 +1117,26 @@
     return `${year}-${month}-${day}`;
   }
 
+  function normalizeDateKey(value) {
+    if (!value) return "";
+    if (value instanceof Date) return formatDate(value);
+    const text = String(value);
+    const match = text.match(/\d{4}-\d{2}-\d{2}/);
+    if (match) return match[0];
+    const parsed = new Date(text);
+    if (!Number.isNaN(parsed.getTime())) return formatDate(parsed);
+    return text.slice(0, 10);
+  }
+
   function daysFromToday(dateString) {
+    dateString = normalizeDateKey(dateString);
     const today = addDays(new Date(), 0);
     const date = new Date(`${dateString}T00:00:00`);
     return Math.round((date - today) / 86400000);
   }
 
   function dayLabel(dateString) {
+    dateString = normalizeDateKey(dateString);
     const date = new Date(`${dateString}T00:00:00`);
     const diff = daysFromToday(dateString);
     if (diff === 0) return "Today";
