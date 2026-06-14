@@ -1,0 +1,18 @@
+{
+  "name": "Climate Command Center",
+  "short_name": "Climate",
+  "description": "Meal-time weather risk monitoring for 51 operating cities.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#0f766e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
